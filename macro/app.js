@@ -4,6 +4,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const fs = require("fs");
+const JSZip = require('jszip');
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
@@ -108,10 +109,9 @@ const crawling = async (filePath) => {
     }
     await driver.quit();
 };
-let commonPath =
-    "/home/yeongori/workspace/Engineering-data-search-service/macro/public/upload";
+let commonPath ="/home/icecoffee/Engineering-data-search-service/macro/public/upload";
 let totalFilePath = "";
-
+let unzipPath = "/home/icecoffee/Engineering-data-search-service/macro/public/downloads"
 const getFilePath = (curPath) => {
     fs.readdir(curPath, (err, FileList) => {
         if (FileList == undefined) return;
@@ -126,22 +126,57 @@ const getFilePath = (curPath) => {
         }
     });
 };
+// const unZip = (filePath)=>{
+//     fs.readFile( filePath, function(err, data){
+//         if(!err){
+//             for(let i=0;i<data.length;i++){
+//                 if(data[i].search(".zip")!=-1){
+//                     let zip = new JSZip();
+//                     JSZip.loadAsync(data).then(function(zip){
+//                         Object.keys(zip.files).forEach(function(filename){
+//                             zip.files[filename].async('string').then(function(fileData){
+//                                 console.log(fileData)
+//                             })
+//                         });
+//                     });
+//                 }
+//             }
+//         }
+//     });
+// };
+
+
 
 process.setMaxListeners(0);
 getFilePath(commonPath);
+//unZip(unzipPath);
 setTimeout(async () => {
+    console.log("HIHI")
+    console.log(totalFilePath);
+    console.log("HI")
     const files = totalFilePath.split("\n");
     let cnt = 0;
-    files.forEach(async (element) => {
-        await crawling(element);
-        cnt++;
-        console.log(element);
-        if (cnt == 9) {
-            setTimeout(() => {}, 2000);
-            cnt = 0;
-        }
-    });
-}, 1000);
+    for (const f of files) {
+         setTimeout(async ()=>{
+             await console.log(f);
+         },1000);
+    }
+    //files.forEach(async(element)=>{
+    //    console.log(element)
+    
+
+    // const files = totalFilePath.split("\n");
+    // let cnt = 0;
+    // files.forEach(async (element) => {
+    //     await crawling(element);
+    //     cnt++;
+    //     console.log(element);
+    //     if (cnt == 9) {
+    //         setTimeout(() => {}, 2000);
+    //         cnt = 0;
+    //     }
+    //});
+}, 5000);
 // crawling();
 // error handler
 app.use(function (err, req, res, next) {
