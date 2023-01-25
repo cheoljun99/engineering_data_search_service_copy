@@ -1,0 +1,26 @@
+{
+  "name": "engineering-data-search-service",
+  "version": "1.0.0",
+  "description": "클라우드 기반의 엔지니어링 데이터 검색 서비스",
+  "main": "hi_gori.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./bin/www"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YEONGORI/Engineering-data-search-service.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YEONGORI/Engineering-data-search-service/issues"
+  },
+  "homepage": "https://github.com/YEONGORI/Engineering-data-search-service#readme",
+  "dependencies": {
+    "decompress": "^4.2.1",
+    "fs": "^0.0.1-security",
+    "nodemon": "^2.0.20",
+    "unzip": "^0.1.11"
+  }
+}
