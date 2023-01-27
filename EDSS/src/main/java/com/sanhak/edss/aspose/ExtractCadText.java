@@ -4,6 +4,7 @@ import com.aspose.cad.fileformats.cad.CadImage;
 import com.aspose.cad.fileformats.cad.cadconsts.CadEntityTypeName;
 import com.aspose.cad.fileformats.cad.cadobjects.CadBaseEntity;
 import com.aspose.cad.fileformats.cad.cadobjects.CadBlockEntity;
+import com.aspose.cad.fileformats.cad.cadobjects.CadMText;
 import com.aspose.cad.fileformats.cad.cadobjects.CadText;
 
 import java.io.File;
@@ -18,6 +19,7 @@ public class ExtractCadText {
 
     public static String setDataPath() {
         File dir = new File(System.getProperty("user.dir"));
+        dir = new File(dir, "EDSS");//temp
         dir = new File(dir, "src");
         dir = new File(dir, "main");
         dir = new File(dir, "resources");
@@ -59,8 +61,15 @@ public class ExtractCadText {
             for (CadBaseEntity entity : blockEntity.getEntities()) {
                 if (entity.getTypeName() == CadEntityTypeName.TEXT) {
                     CadText childObjectText = (CadText)entity;
-                    index = index + childObjectText.getDefaultValue() + ", ";
+                    index = index + childObjectText.getDefaultValue() + "| ";
                 }
+
+                else if (entity.getTypeName() == CadEntityTypeName.MTEXT) {
+                    CadMText childObjectText = (CadMText)entity;
+                    index += childObjectText.getText();
+                    index += "| ";
+                }
+
             }
         }
         return index;

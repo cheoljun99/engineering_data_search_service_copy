@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.ByteArrayOutputStream;
+
 @Data
 @Document(collection = "cad")
 public class Cad {
@@ -14,11 +16,17 @@ public class Cad {
     private String title;
     private String index;
 
-    public Cad(String mainCategory, String subCategory, String title, String index) {
+    //private ByteArrayOutputStream JpegImage;
+
+
+
+
+    public Cad(String mainCategory, String subCategory, String title, String index ) {
         this.mainCategory = mainCategory;
         this.subCategory = subCategory;
         this.title = title;
         this.index = index;
+        //this.JpegImage = Image;
     }
 
     @Override
