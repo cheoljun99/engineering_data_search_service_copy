@@ -1,5 +1,6 @@
 package com.sanhak.edss.cad;
 
+import co.elastic.clients.elasticsearch.nodes.Http;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +31,13 @@ public class CadController {
     }
 
     @PostMapping("/data")
-    public ResponseEntity<Cad> createCadDatas(@RequestBody Cad cad) {
-        try {
-            Cad _cad = cadService.saveCadFile(cad);
-            return new ResponseEntity<>(_cad, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<HttpStatus> createCadDatas(@RequestBody String s3Url) {
+        cadService.saveCadFile(s3Url);
+        return new ResponseEntity<>(HttpStatus.OK);
+//        try {
+//        } catch (Exception e) {
+//            System.out.println("ERROR");
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
     }
 }
