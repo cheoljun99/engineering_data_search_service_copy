@@ -1,2 +1,5 @@
-package com.sanhak.edss.elasticsearch;public class ElasticsearchConfig {
+package com.sanhak.edss.elasticsearch;
+
+public class ElasticsearchConfig {
+
 }
