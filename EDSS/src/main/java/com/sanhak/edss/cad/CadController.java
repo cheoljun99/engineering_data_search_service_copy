@@ -29,6 +29,7 @@ public class CadController {
 
     @PostMapping("/data")
     public ResponseEntity<HttpStatus> createCadDatas(@RequestBody String s3Url) {
+        System.out.println("Cad Controll");
         cadService.saveCadFile(s3Url);
         return new ResponseEntity<>(HttpStatus.OK);
 //        try {

@@ -19,11 +19,13 @@ public class CadServiceImpl implements CadService {
 
     public void saveCadFile(String dir) {
         try {
+            System.out.println("cadServiceimpl");
             String[] mainCategory = dir.split("\"");
             s3Utils.downloadFolder(mainCategory[3]);
             Map<String, String[]> fileInfo = asposeUtils.searchCadFleInDataDir(mainCategory[3]);
+            System.out.println("cadServiceimpl222");
             for (Map.Entry<String, String[]> entry: fileInfo.entrySet()) {
-                Cad cad = new Cad(mainCategory[3], entry.getValue()[0], entry.getKey(), entry.getValue()[1]);
+                Cad cad = new Cad(mainCategory[3], entry.getValue()[0], entry.getKey(), entry.getValue()[1], entry.getValue()[2]);
                 cadRepository.save(cad);
             }
         } catch (IOException e) {

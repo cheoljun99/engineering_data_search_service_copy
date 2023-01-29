@@ -1,14 +1,20 @@
 package com.sanhak.edss.aspose;
 
+import com.aspose.cad.Image;
 import com.aspose.cad.fileformats.cad.CadImage;
 import com.aspose.cad.fileformats.cad.cadconsts.CadEntityTypeName;
 import com.aspose.cad.fileformats.cad.cadobjects.CadBaseEntity;
 import com.aspose.cad.fileformats.cad.cadobjects.CadBlockEntity;
 import com.aspose.cad.fileformats.cad.cadobjects.CadMText;
 import com.aspose.cad.fileformats.cad.cadobjects.CadText;
+import com.aspose.cad.imageoptions.JpegOptions;
+import com.sanhak.edss.s3.S3Utils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -16,8 +22,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
+@RequiredArgsConstructor
 @Component
 public class AsposeUtils {
+    private final S3Utils s3Utils;
     private static final String dataDir = setDataPath();
 
     public static String setDataPath() {
@@ -28,6 +36,7 @@ public class AsposeUtils {
     }
 
     public Map<String, String[]> searchCadFleInDataDir(String dir) {
+        System.out.println("searchCadFileInDataDir");
         Map<String, String[]> fileInfo = new HashMap<>();
         try {
             Files.walkFileTree(Paths.get(dataDir + dir), new SimpleFileVisitor<>() {
@@ -37,8 +46,13 @@ public class AsposeUtils {
                         String fileName = file.getFileName().toString();
                         String filePath = file.toAbsolutePath().toString();
                         String fileIndex = extractTextInCadFile(filePath);
+                        System.out.println(filePath);////
+                        ByteArrayOutputStream outputStream = CadToJpeg(filePath);
+                        ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+                        String S3url = s3Utils.putS3(filePath, inputStream);
+                        System.out.println(S3url);/////
                         filePath = filePath.substring(filePath.indexOf(dir), filePath.indexOf(fileName));
-                        fileInfo.put(fileName, new String[]{filePath, fileIndex});
+                        fileInfo.put(fileName, new String[]{filePath, fileIndex, S3url});
                     }
                     return FileVisitResult.CONTINUE;
                 }
@@ -50,6 +64,9 @@ public class AsposeUtils {
     }
 
     public static String extractTextInCadFile(String fileName) {
+
+        System.out.println("extractTextInCadFile");
+
         String index = "";
 
         // Load an existing DWG file as CadImage.
@@ -72,5 +89,19 @@ public class AsposeUtils {
             }
         }
         return index;
+    }
+
+    public static ByteArrayOutputStream CadToJpeg(String fileName) {
+        System.out.println("CadToJpeg");
+        try {
+            String tmp = dataDir + "CadToJpeg" + File.separator;
+            Image cadImage = Image.load(fileName);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            cadImage.save(stream, new JpegOptions());
+            return stream;
+        }catch(Exception e){
+            System.out.println("error");
+            return null;
+        }
     }
 }
