@@ -1,21 +1,30 @@
 package com.sanhak.edss.s3;
 
+import co.elastic.clients.elasticsearch.watcher.Input;
+import com.amazonaws.services.cloudformation.model.Output;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.transfer.TransferManager;
+import com.sanhak.edss.aspose.AsposeUtils;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+//import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Transactional(readOnly = true)
 @PropertySource(value = "application.properties")
@@ -24,9 +33,8 @@ import java.net.URLDecoder;
 public class S3Utils {
     private final TransferManager transferManager;
     private final AmazonS3Client amazonS3Client;
-
     @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
+    public String bucket;
 
     public void downloadFolder(String dir) throws IOException {
         try {
@@ -38,15 +46,24 @@ public class S3Utils {
             e.getMessage();
         }
     }
-    public String putS3(String filePath, InputStream stream){
+    public String putS3(String filePath, String fileName, ByteArrayOutputStream bos)throws IOException{
         System.out.println("PutS3");
+
+        byte[] data = bos.toByteArray();
+        ByteArrayInputStream bin = new ByteArrayInputStream(data);
+
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(MediaType.IMAGE_JPEG_VALUE);
-        amazonS3Client.putObject(new PutObjectRequest(bucket,filePath,stream, metadata).withCannedAcl(CannedAccessControlList.PublicRead));
-        return amazonS3Client.getUrl(bucket,filePath).toString();
-    }
+        metadata.setContentLength(data.length);
 
-    private void removeNewFile(File fileName){
-        fileName.delete();
+
+        //String encode_fileName = URLEncoder.encode(fileName,"UTF-8");
+        String S3_fileName = fileName.substring(0,fileName.length()-4) + ".jpeg";
+
+        amazonS3Client.putObject(bucket,filePath+S3_fileName,bin, metadata);
+        String PathUrl = amazonS3Client.getUrl(bucket,filePath).toString();
+        bin.close();
+        System.out.println(PathUrl + S3_fileName);
+        return PathUrl+S3_fileName;
     }
 }

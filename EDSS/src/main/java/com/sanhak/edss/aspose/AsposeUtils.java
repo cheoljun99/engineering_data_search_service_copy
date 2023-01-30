@@ -7,7 +7,10 @@ import com.aspose.cad.fileformats.cad.cadobjects.CadBaseEntity;
 import com.aspose.cad.fileformats.cad.cadobjects.CadBlockEntity;
 import com.aspose.cad.fileformats.cad.cadobjects.CadMText;
 import com.aspose.cad.fileformats.cad.cadobjects.CadText;
+import com.aspose.cad.imageoptions.BmpOptions;
+import com.aspose.cad.imageoptions.CadRasterizationOptions;
 import com.aspose.cad.imageoptions.JpegOptions;
+import com.aspose.cad.imageoptions.PngOptions;
 import com.sanhak.edss.s3.S3Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,31 +29,33 @@ import java.util.Map;
 @Component
 public class AsposeUtils {
     private final S3Utils s3Utils;
-    private static final String dataDir = setDataPath();
+    private static final String dataDir = setDataPath() + "s3-download" + File.separator;
+    public static final String ImagePath = setDataPath() + "testtest" + File.separator;
 
     public static String setDataPath() {
         File dir = new File(System.getProperty("user.dir"));
 //        dir = new File(dir, "EDSS");//temp
-        dir = new File(dir, "s3-download");
         return dir + File.separator;
     }
 
     public Map<String, String[]> searchCadFleInDataDir(String dir) {
         System.out.println("searchCadFileInDataDir");
+        System.out.println(dir);
         Map<String, String[]> fileInfo = new HashMap<>();
         try {
+            System.out.println("searchCadFileInDataDir2222");
             Files.walkFileTree(Paths.get(dataDir + dir), new SimpleFileVisitor<>() {
+
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException{
+                    System.out.println("visitFile");
                     if (!Files.isDirectory(file) && file.getFileName().toString().contains(".dwg")) {
                         String fileName = file.getFileName().toString();
                         String filePath = file.toAbsolutePath().toString();
                         String fileIndex = extractTextInCadFile(filePath);
-                        System.out.println(filePath);////
-                        ByteArrayOutputStream outputStream = CadToJpeg(filePath);
-                        ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-                        String S3url = s3Utils.putS3(filePath, inputStream);
-                        System.out.println(S3url);/////
+                        ByteArrayOutputStream bos = CadToJpeg(filePath);
+                        String S3url = s3Utils.putS3("image/", fileName, bos);
+                        System.out.println(fileName.indexOf(fileName));
                         filePath = filePath.substring(filePath.indexOf(dir), filePath.indexOf(fileName));
                         fileInfo.put(fileName, new String[]{filePath, fileIndex, S3url});
                     }
@@ -58,6 +63,7 @@ public class AsposeUtils {
                 }
             });
         } catch (IOException e) {
+            System.out.println("visitFIle error");
             e.printStackTrace();
         }
         return fileInfo;
@@ -91,17 +97,23 @@ public class AsposeUtils {
         return index;
     }
 
-    public static ByteArrayOutputStream CadToJpeg(String fileName) {
+    public ByteArrayOutputStream CadToJpeg(String filePath) {
         System.out.println("CadToJpeg");
-        try {
-            String tmp = dataDir + "CadToJpeg" + File.separator;
-            Image cadImage = Image.load(fileName);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            cadImage.save(stream, new JpegOptions());
-            return stream;
-        }catch(Exception e){
-            System.out.println("error");
-            return null;
-        }
+
+
+        Image cadImage = Image.load(filePath);
+
+        CadRasterizationOptions rasterizationOptions = new CadRasterizationOptions();
+        rasterizationOptions.setPageHeight(200);
+        rasterizationOptions.setPageWidth(200);
+
+        JpegOptions options = new JpegOptions();
+
+        options.setVectorRasterizationOptions(rasterizationOptions);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        cadImage.save(bos, options);
+        return bos;
+
     }
 }
