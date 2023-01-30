@@ -14,7 +14,7 @@ public class CadController {
     private final CadServiceImpl cadService;
 
     @GetMapping("/data")
-    public ResponseEntity<List<Cad>> getCadDatas(@RequestBody String searchText) {
+    public ResponseEntity<List<Cad>> getCadDatas(@RequestParam String searchText) {
         try {
             if (searchText == null)
                 System.out.println("검색어 입력 필요");
@@ -37,10 +37,5 @@ public class CadController {
             System.out.println("save Error");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-//        try {
-//        } catch (Exception e) {
-//            System.out.println("ERROR");
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
     }
 }

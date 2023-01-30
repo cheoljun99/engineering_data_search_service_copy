@@ -1,6 +1,5 @@
 package com.sanhak.edss.cad;
 
-import com.amazonaws.services.s3.transfer.MultipleFileDownload;
 import com.sanhak.edss.aspose.AsposeUtils;
 import com.sanhak.edss.s3.S3Utils;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 
@@ -32,25 +30,7 @@ public class CadServiceImpl implements CadService {
 
 
             String existDir = AsposeUtils.dataDir+mainCategory[3];
-            //System.out.println(existDir);
-            /*File checkfile = new File(existDir);
-            if(!checkfile.exists()){
-                wait(1000);
-            }*/
 
-            /*DelayThread thread1 = new DelayThread(s3Utils);
-            thread1.setName(mainCategory[3]);
-            thread1.start();
-            thread1.join();*/
-            /*final Object lock = new Object();
-            synchronized (lock){
-                lock.wait();
-                File checkfile = new File(existDir);
-                if(checkfile.exists()){
-                    notifyAll();
-                }
-
-            }*/
             Map<String, String[]> fileInfo = asposeUtils.searchCadFleInDataDir(mainCategory[3]);
 
             System.out.println("cadServiceimpl222");
@@ -58,6 +38,7 @@ public class CadServiceImpl implements CadService {
                 Cad cad = new Cad(mainCategory[3], entry.getValue()[0], entry.getKey(), entry.getValue()[1], entry.getValue()[2]);
                 cadRepository.save(cad);
             }
+            System.out.println("cadserviceimpl333");
             remove(new File(AsposeUtils.dataDir));
 
 
@@ -86,8 +67,7 @@ public class CadServiceImpl implements CadService {
         try {
             if (searchText == "")
                 return null;
-            String[] text = searchText.split("\"");
-            String[] eachText = text[3].split(" ");
+            String[] eachText = searchText.split(" ");
             List<Cad> result = cadRepository.findAllByTitleContains(eachText[0]);
             result = Stream.concat(result.stream(), cadRepository.findAllByIndexContains(eachText[0]).stream()).distinct().toList();
             for (int i=1; i < eachText.length; i++) {
