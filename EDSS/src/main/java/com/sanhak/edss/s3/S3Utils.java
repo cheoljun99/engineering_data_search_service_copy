@@ -62,7 +62,13 @@ public class S3Utils {
     public String putS3(String filePath, String fileName, ByteArrayOutputStream bos)throws IOException{
         System.out.println("PutS3");
 
-        byte[] data = bos.toByteArray();
+        byte[] data;
+        if(bos == null){
+            return null;
+        }
+        else{
+            data = bos.toByteArray();
+        }
         ByteArrayInputStream bin = new ByteArrayInputStream(data);
 
         ObjectMetadata metadata = new ObjectMetadata();

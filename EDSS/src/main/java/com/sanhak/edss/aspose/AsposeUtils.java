@@ -24,6 +24,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.*;
 
 @RequiredArgsConstructor
 @Component
@@ -55,8 +56,9 @@ public class AsposeUtils {
                         String fileIndex = extractTextInCadFile(filePath);
                         ByteArrayOutputStream bos = CadToJpeg(filePath);
                         String S3url = s3Utils.putS3("image/", fileName, bos);
+                        System.out.println(S3url);
                         System.out.println(fileName.indexOf(fileName));
-                        filePath = filePath.substring(filePath.indexOf(dir), filePath.indexOf(fileName));
+                        filePath = filePath.substring(filePath.indexOf(dir) + dir.length(), filePath.indexOf(fileName) - 1);
                         fileInfo.put(fileName, new String[]{filePath, fileIndex, S3url});
                     }
                     return FileVisitResult.CONTINUE;
@@ -112,8 +114,25 @@ public class AsposeUtils {
         options.setVectorRasterizationOptions(rasterizationOptions);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        cadImage.save(bos, options);
+
+        ExecutorService executor = Executors.newCachedThreadPool();
+        Callable<Object> task = new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                cadImage.save(bos,options);
+                System.out.println("success");
+                return bos;
+            }
+        };
+        Future<Object> future = executor.submit(task);
+        try{
+            Object result = future.get(10,TimeUnit.SECONDS);
+        }catch (TimeoutException | ExecutionException | InterruptedException time_e){
+            System.out.println("fail");
+            return null;
+        }
         return bos;
+
 
     }
 }
