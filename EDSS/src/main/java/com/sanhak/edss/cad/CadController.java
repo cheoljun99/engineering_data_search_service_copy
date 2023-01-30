@@ -37,10 +37,5 @@ public class CadController {
             System.out.println("save Error");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-//        try {
-//        } catch (Exception e) {
-//            System.out.println("ERROR");
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
     }
 }

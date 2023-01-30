@@ -7,16 +7,12 @@ import com.aspose.cad.fileformats.cad.cadobjects.CadBaseEntity;
 import com.aspose.cad.fileformats.cad.cadobjects.CadBlockEntity;
 import com.aspose.cad.fileformats.cad.cadobjects.CadMText;
 import com.aspose.cad.fileformats.cad.cadobjects.CadText;
-import com.aspose.cad.imageoptions.BmpOptions;
 import com.aspose.cad.imageoptions.CadRasterizationOptions;
 import com.aspose.cad.imageoptions.JpegOptions;
-import com.aspose.cad.imageoptions.PngOptions;
 import com.sanhak.edss.s3.S3Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +31,6 @@ public class AsposeUtils {
 
     public static String setDataPath() {
         File dir = new File(System.getProperty("user.dir"));
-//        dir = new File(dir, "EDSS");//temp
         return dir + File.separator;
     }
 
@@ -55,10 +50,11 @@ public class AsposeUtils {
                         String filePath = file.toAbsolutePath().toString();
                         String fileIndex = extractTextInCadFile(filePath);
                         ByteArrayOutputStream bos = CadToJpeg(filePath);
+                        System.out.println(filePath);
                         String S3url = s3Utils.putS3("image/", fileName, bos);
                         System.out.println(S3url);
-                        System.out.println(fileName.indexOf(fileName));
                         filePath = filePath.substring(filePath.indexOf(dir) + dir.length(), filePath.indexOf(fileName) - 1);
+                        System.out.println(filePath);
                         fileInfo.put(fileName, new String[]{filePath, fileIndex, S3url});
                     }
                     return FileVisitResult.CONTINUE;
