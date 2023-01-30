@@ -6,34 +6,80 @@ import com.sanhak.edss.s3.S3Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+
+
 
 @RequiredArgsConstructor
 @Service
 public class CadServiceImpl implements CadService {
+
     private final CadRepository cadRepository;
     private final S3Utils s3Utils;
     private final AsposeUtils asposeUtils;
+
 
     public void saveCadFile(String dir) {
         try {
             System.out.println("cadServiceimpl");
             String[] mainCategory = dir.split("\"");
-            MultipleFileDownload xfer = s3Utils.downloadFolder(mainCategory[3]);
-            xfer.waitForCompletion();
+            s3Utils.downloadFolder(mainCategory[3]);
+
+
+            String existDir = AsposeUtils.dataDir+mainCategory[3];
+            //System.out.println(existDir);
+            /*File checkfile = new File(existDir);
+            if(!checkfile.exists()){
+                wait(1000);
+            }*/
+
+            /*DelayThread thread1 = new DelayThread(s3Utils);
+            thread1.setName(mainCategory[3]);
+            thread1.start();
+            thread1.join();*/
+            /*final Object lock = new Object();
+            synchronized (lock){
+                lock.wait();
+                File checkfile = new File(existDir);
+                if(checkfile.exists()){
+                    notifyAll();
+                }
+
+            }*/
             Map<String, String[]> fileInfo = asposeUtils.searchCadFleInDataDir(mainCategory[3]);
+
             System.out.println("cadServiceimpl222");
             for (Map.Entry<String, String[]> entry: fileInfo.entrySet()) {
                 Cad cad = new Cad(mainCategory[3], entry.getValue()[0], entry.getKey(), entry.getValue()[1], entry.getValue()[2]);
                 cadRepository.save(cad);
             }
+            remove(new File(AsposeUtils.dataDir));
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    public void remove(File file) throws IOException {
+        if (file.isDirectory()) {
+            removeDirectory(file);
+        } else {
+            file.delete();
+        }
+    }
+    public void removeDirectory(File directory) throws IOException {
+        File[] files = directory.listFiles();
+        for (File file : files) {
+            file.delete();
+        }
+        directory.delete();
+    }
+
 
 
     public List<Cad> searchCadFile(String searchText) {

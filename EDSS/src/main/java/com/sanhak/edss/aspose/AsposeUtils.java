@@ -29,7 +29,7 @@ import java.util.Map;
 @Component
 public class AsposeUtils {
     private final S3Utils s3Utils;
-    private static final String dataDir = setDataPath() + "s3-download" + File.separator;
+    public static final String dataDir = setDataPath() + "s3-download" + File.separator;
     public static final String ImagePath = setDataPath() + "testtest" + File.separator;
 
     public static String setDataPath() {
