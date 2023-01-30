@@ -86,8 +86,7 @@ public class CadServiceImpl implements CadService {
         try {
             if (searchText == "")
                 return null;
-            String[] text = searchText.split("\"");
-            String[] eachText = text[3].split(" ");
+            String[] eachText = searchText.split(" ");
             List<Cad> result = cadRepository.findAllByTitleContains(eachText[0]);
             result = Stream.concat(result.stream(), cadRepository.findAllByIndexContains(eachText[0]).stream()).distinct().toList();
             for (int i=1; i < eachText.length; i++) {

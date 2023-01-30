@@ -14,7 +14,7 @@ public class CadController {
     private final CadServiceImpl cadService;
 
     @GetMapping("/data")
-    public ResponseEntity<List<Cad>> getCadDatas(@RequestBody String searchText) {
+    public ResponseEntity<List<Cad>> getCadDatas(@RequestParam String searchText) {
         try {
             if (searchText == null)
                 System.out.println("검색어 입력 필요");
