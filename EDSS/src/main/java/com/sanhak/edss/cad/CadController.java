@@ -29,9 +29,14 @@ public class CadController {
 
     @PostMapping("/data")
     public ResponseEntity<HttpStatus> createCadDatas(@RequestBody String s3Url) {
-        System.out.println("Cad Controll");
-        cadService.saveCadFile(s3Url);
-        return new ResponseEntity<>(HttpStatus.OK);
+        try {
+            System.out.println("Cad Controll");
+            cadService.saveCadFile(s3Url);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (Exception e){
+            System.out.println("save Error");
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 //        try {
 //        } catch (Exception e) {
 //            System.out.println("ERROR");
