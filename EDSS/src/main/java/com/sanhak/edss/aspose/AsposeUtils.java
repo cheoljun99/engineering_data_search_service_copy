@@ -73,27 +73,28 @@ public class AsposeUtils {
         System.out.println("extractTextInCadFile");
 
         String index = "";
+        try {
+            CadImage cadImage = (CadImage) CadImage.load(fileName);
+            for (CadBlockEntity blockEntity : cadImage.getBlockEntities().getValues()) {
+                for (CadBaseEntity entity : blockEntity.getEntities()) {
+                    if (entity.getTypeName() == CadEntityTypeName.TEXT) {
+                        CadText childObjectText = (CadText)entity;
+                        index = index + childObjectText.getDefaultValue() + "| ";
+                    }
 
-        // Load an existing DWG file as CadImage.
-        CadImage cadImage = (CadImage) CadImage.load(fileName);
+                    else if (entity.getTypeName() == CadEntityTypeName.MTEXT) {
+                        CadMText childObjectText = (CadMText)entity;
+                        index += childObjectText.getText();
+                        index += "| ";
+                    }
 
-        // Search for text in the block section
-        for (CadBlockEntity blockEntity : cadImage.getBlockEntities().getValues()) {
-            for (CadBaseEntity entity : blockEntity.getEntities()) {
-                if (entity.getTypeName() == CadEntityTypeName.TEXT) {
-                    CadText childObjectText = (CadText)entity;
-                    index = index + childObjectText.getDefaultValue() + "| ";
                 }
-
-                else if (entity.getTypeName() == CadEntityTypeName.MTEXT) {
-                    CadMText childObjectText = (CadMText)entity;
-                    index += childObjectText.getText();
-                    index += "| ";
-                }
-
             }
+            return index;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return index;
+        return "";
     }
 
     public ByteArrayOutputStream CadToJpeg(String filePath) {
