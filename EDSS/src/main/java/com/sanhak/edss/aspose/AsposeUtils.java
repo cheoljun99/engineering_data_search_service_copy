@@ -100,38 +100,41 @@ public class AsposeUtils {
     public ByteArrayOutputStream CadToJpeg(String filePath) {
         System.out.println("CadToJpeg");
 
+        try {
+            Image cadImage = Image.load(filePath);
 
-        Image cadImage = Image.load(filePath);
+            CadRasterizationOptions rasterizationOptions = new CadRasterizationOptions();
+            rasterizationOptions.setPageHeight(200);
+            rasterizationOptions.setPageWidth(200);
 
-        CadRasterizationOptions rasterizationOptions = new CadRasterizationOptions();
-        rasterizationOptions.setPageHeight(200);
-        rasterizationOptions.setPageWidth(200);
+            JpegOptions options = new JpegOptions();
 
-        JpegOptions options = new JpegOptions();
+            options.setVectorRasterizationOptions(rasterizationOptions);
 
-        options.setVectorRasterizationOptions(rasterizationOptions);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-        ExecutorService executor = Executors.newCachedThreadPool();
-        Callable<Object> task = new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                cadImage.save(bos,options);
-                System.out.println("success");
-                return bos;
+            ExecutorService executor = Executors.newCachedThreadPool();
+            Callable<Object> task = new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    cadImage.save(bos, options);
+                    System.out.println("success");
+                    return bos;
+                }
+            };
+            Future<Object> future = executor.submit(task);
+            executor.shutdown();
+            try {
+                Object result = future.get(10, TimeUnit.SECONDS);
+            } catch (TimeoutException | ExecutionException | InterruptedException time_e) {
+                time_e.printStackTrace();
+                return null;
             }
-        };
-        Future<Object> future = executor.submit(task);
-        executor.shutdown();
-        try{
-            Object result = future.get(10,TimeUnit.SECONDS);
-        }catch (TimeoutException | ExecutionException | InterruptedException time_e){
-            time_e.printStackTrace();
+            return bos;
+        }catch (Exception e){
+            System.out.println("cadtoimage error");
+            e.printStackTrace();
             return null;
         }
-        return bos;
-
-
     }
 }

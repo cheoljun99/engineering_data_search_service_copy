@@ -87,6 +87,9 @@ public class CadServiceImpl implements CadService {
             for (int i=1; i < eachText.length; i++) {
                 result = Stream.concat(result.stream(), cadRepository.findAllByTitleContains(eachText[i]).stream()).distinct().toList();
                 result = Stream.concat(result.stream(), cadRepository.findAllByIndexContains(eachText[i]).stream()).distinct().toList();
+                result = Stream.concat(result.stream(), cadRepository.findAllByMainCategoryContains(eachText[i]).stream()).distinct().toList();
+                result = Stream.concat(result.stream(), cadRepository.findAllBySubCategoryContains(eachText[i]).stream()).distinct().toList();
+
             }
             return result;
         } catch (Exception e) {
