@@ -49,8 +49,9 @@ public class AsposeUtils {
                         String fileName = file.getFileName().toString();
                         String filePath = file.toAbsolutePath().toString();
                         String fileIndex = extractTextInCadFile(filePath);
+                        System.out.println("complete extract");
                         ByteArrayOutputStream bos = CadToJpeg(filePath);
-                        System.out.println(filePath);
+                        System.out.println("complete cadToJpeg");
                         String S3url = s3Utils.putS3("image/", fileName, bos);
                         System.out.println(S3url);
                         filePath = filePath.substring(filePath.indexOf(dir) + dir.length(), filePath.indexOf(fileName) - 1);
@@ -72,27 +73,28 @@ public class AsposeUtils {
         System.out.println("extractTextInCadFile");
 
         String index = "";
+        try {
+            CadImage cadImage = (CadImage) CadImage.load(fileName);
+            for (CadBlockEntity blockEntity : cadImage.getBlockEntities().getValues()) {
+                for (CadBaseEntity entity : blockEntity.getEntities()) {
+                    if (entity.getTypeName() == CadEntityTypeName.TEXT) {
+                        CadText childObjectText = (CadText)entity;
+                        index = index + childObjectText.getDefaultValue() + "| ";
+                    }
 
-        // Load an existing DWG file as CadImage.
-        CadImage cadImage = (CadImage) CadImage.load(fileName);
+                    else if (entity.getTypeName() == CadEntityTypeName.MTEXT) {
+                        CadMText childObjectText = (CadMText)entity;
+                        index += childObjectText.getText();
+                        index += "| ";
+                    }
 
-        // Search for text in the block section
-        for (CadBlockEntity blockEntity : cadImage.getBlockEntities().getValues()) {
-            for (CadBaseEntity entity : blockEntity.getEntities()) {
-                if (entity.getTypeName() == CadEntityTypeName.TEXT) {
-                    CadText childObjectText = (CadText)entity;
-                    index = index + childObjectText.getDefaultValue() + "| ";
                 }
-
-                else if (entity.getTypeName() == CadEntityTypeName.MTEXT) {
-                    CadMText childObjectText = (CadMText)entity;
-                    index += childObjectText.getText();
-                    index += "| ";
-                }
-
             }
+            return index;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return index;
+        return "";
     }
 
     public ByteArrayOutputStream CadToJpeg(String filePath) {
@@ -121,10 +123,11 @@ public class AsposeUtils {
             }
         };
         Future<Object> future = executor.submit(task);
+        executor.shutdown();
         try{
             Object result = future.get(10,TimeUnit.SECONDS);
         }catch (TimeoutException | ExecutionException | InterruptedException time_e){
-            System.out.println("fail");
+            time_e.printStackTrace();
             return null;
         }
         return bos;
