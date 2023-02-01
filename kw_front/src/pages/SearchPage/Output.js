@@ -82,9 +82,13 @@ function Output({ output, setOutput }) {
             className="ml-3 hover:border-[#e4e1f1] hover:border rounded-[6px] focus:outline-none focus:ring-4 focus:ring-[#f1f6fe]"
             onClick={() => {
               let TmpOutput = [...output];
-              TmpOutput.sort((a, b) =>
-                a.createdAt.toLowerCase() < b.createdAt.toLowerCase() ? -1 : 1
-              );
+              TmpOutput.sort((a, b) => {
+                new Date(a.createdAt).getTime() <
+                new Date(b.createdAt).getTime()
+                  ? -1
+                  : 1;
+              });
+
               console.log(TmpOutput);
               setOutput(TmpOutput);
             }}
@@ -95,9 +99,12 @@ function Output({ output, setOutput }) {
             className="ml-3 hover:border-[#e4e1f1] hover:border rounded-[6px] focus:outline-none focus:ring-4 focus:ring-[#f1f6fe]"
             onClick={() => {
               let TmpOutput = [...output];
-              TmpOutput.sort((a, b) =>
-                a.createdAt.toLowerCase() > b.createdAt.toLowerCase() ? -1 : 1
-              );
+              TmpOutput.sort((a, b) => {
+                new Date(a.createdAt).getTime() >
+                new Date(b.createdAt).getTime()
+                  ? -1
+                  : 1;
+              });
               console.log(TmpOutput);
               setOutput(TmpOutput);
             }}
