@@ -1,5 +1,5 @@
 import { AiOutlineArrowUp, AiOutlineArrowDown } from "react-icons/ai";
-
+import cryptoJs from "crypto-js";
 function Output({ output, setOutput }) {
   const REGION = "ap-northeast-2";
   const S3_BUCKET = "dwg-upload";
@@ -9,7 +9,20 @@ function Output({ output, setOutput }) {
 
     for (let i = 0; i < filelist.length; i++) {
       const fileURL = `https://${S3_BUCKET}.s3.${REGION}.amazonaws.com/${filelist[i].mainCategory}${filelist[i].subCategory}/${filelist[i].title}`;
-      const imgURL = filelist[i].s3Url;
+      ////////////////////////////////////////////////////////////////
+      const decipher = cryptoJs.AES.decrypt(
+        filelist[i].s3Url,
+        cryptoJs.enc.Utf8.parse(process.env.REACT_APP_AES_KEY),
+        {
+          iv: cryptoJs.enc.Utf8.parse(process.env.REACT_APP_AES_IV),
+          padding: cryptoJs.pad.Pkcs7,
+          mode: cryptoJs.mode.CBC,
+        }
+      );
+      const imgURL = decipher.toString(cryptoJs.enc.Utf8);
+      ///////////////////////////////////////////////////////////////
+
+      const date = `${filelist[i].createdAt[0]}.${filelist[i].createdAt[1]}.${filelist[i].createdAt[2]} ${filelist[i].createdAt[3]}:${filelist[i].createdAt[4]}:${filelist[i].createdAt[5]}`;
 
       result.push(
         <a
@@ -35,8 +48,8 @@ function Output({ output, setOutput }) {
           <div className=" w-full h-[10%] border-b text-[14px] break-all truncate  hover:z-10 hover:overflow-y-auto hover:whitespace-normal hover:h-[40%] hover:border hover:border-black">
             작성자: {filelist[i].author}
           </div>
-          <div className=" w-full h-[10%] border-b text-[14px] break-all truncate  hover:z-10 hover:overflow-y-auto hover:whitespace-normal hover:h-[40%] hover:border hover:border-black">
-            수정날짜: {filelist[i].createdAt}
+          <div className=" w-full h-[10%]  text-[14px] break-all truncate  hover:z-10 hover:overflow-y-auto hover:whitespace-normal hover:h-[40%] hover:border hover:border-black">
+            작성날짜: {date}
           </div>
         </a>
       );
@@ -82,13 +95,9 @@ function Output({ output, setOutput }) {
             className="ml-3 hover:border-[#e4e1f1] hover:border rounded-[6px] focus:outline-none focus:ring-4 focus:ring-[#f1f6fe]"
             onClick={() => {
               let TmpOutput = [...output];
-              TmpOutput.sort((a, b) => {
-                new Date(a.createdAt).getTime() <
-                new Date(b.createdAt).getTime()
-                  ? -1
-                  : 1;
-              });
-
+              TmpOutput.sort((a, b) =>
+                a.createdAt.toLowerCase() < b.createdAt.toLowerCase() ? -1 : 1
+              );
               console.log(TmpOutput);
               setOutput(TmpOutput);
             }}
@@ -99,12 +108,9 @@ function Output({ output, setOutput }) {
             className="ml-3 hover:border-[#e4e1f1] hover:border rounded-[6px] focus:outline-none focus:ring-4 focus:ring-[#f1f6fe]"
             onClick={() => {
               let TmpOutput = [...output];
-              TmpOutput.sort((a, b) => {
-                new Date(a.createdAt).getTime() >
-                new Date(b.createdAt).getTime()
-                  ? -1
-                  : 1;
-              });
+              TmpOutput.sort((a, b) =>
+                a.createdAt.toLowerCase() > b.createdAt.toLowerCase() ? -1 : 1
+              );
               console.log(TmpOutput);
               setOutput(TmpOutput);
             }}
